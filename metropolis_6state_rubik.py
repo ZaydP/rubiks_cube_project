@@ -17,22 +17,11 @@ fig, ax = plt.subplots()
 
 
 
-def do_random_op():
-    possible_moves = my_cube.get_move_list()
-    ran = np.random.randint(len(possible_moves))
-    my_cube.string_operation(possible_moves[ran])
-
-def test_random_op():
-    possible_moves = my_cube.get_move_list()
-    ran = np.random.randint(len(possible_moves))
-    return my_cube.string_operation(possible_moves[ran],prospective=True, return_state=True)
-
-
-
-
 def hot_start(dist):
+    possible_moves = my_cube.get_move_list()
     for i in range(dist):
-        do_random_op()
+        ran = np.random.randint(len(possible_moves))
+        my_cube.string_operation(possible_moves[ran])
 
 
 def metropolis_sweep(metric,beta):
@@ -64,72 +53,37 @@ def metropolis_sweep(metric,beta):
 
 
 
+def execute_metropolis(chosen_metric,sweeps,beta):
+    swept_cubes = np.empty([sweeps,54])
+    metric_values = np.empty(sweeps)
+
+    for i in range(sweeps):
+        swept_cubes[i] = metropolis_sweep(chosen_metric,beta)
+        metric_values[i] = chosen_metric(swept_cubes[i])
+
+    return swept_cubes, metric_values
 
 
-def Miles_Metric_Move():
-    old_dist=my_cube.calculate_metric()
-
-    possible_moves = my_cube.get_move_list()
-    opposite_moves = ["F'","F","F2","B'","B", "B2", "U'","U", 'U2', "D'", "D", 'D2', "R'", "R", 'R2', "L'", "L", 'L2', "M'", "M", 'M2', "E'", "E", 'E2', "S'", "S", 'S2']
-    new_dists=np.empty(len(possible_moves))
-    for i in range(len(possible_moves)):
-        my_cube.string_operation(possible_moves[i],prospective=False)
-        new_dists[i]=my_cube.calculate_metric()
-        my_cube.string_operation(opposite_moves[i],prospective=False)
-    min_dist_index = np.argmin(new_dists)
-
-    move_selected = possible_moves[min_dist_index]
-    return move_selected
-
-
-
-    
-
-
-
-
-
-
-
-
-
-
-
-
-sweeps=10000
+sweeps=100
 beta=0.9
-num_frames = sweeps
-animation_speed = 500
-hot_start(30)
+animation_speed = 50
 
 
+hot_start(10)
 
 
+swept_cubes,metric_values = execute_metropolis(metrics.splash_energy_of_config,sweeps,beta)
 
-
-
-
-swept_cubes = np.empty([sweeps,54])
-energies = np.empty(sweeps)
-metric = np.empty(sweeps)
-
-for i in range(sweeps):
-    swept_cubes[i] = metropolis_sweep(metrics.splash_energy_of_config,0.6)
-    energies[i] = metrics.splash_energy_of_config(swept_cubes[i])
-
-
-def Minimize(n,func):
-    for i in range(n):
-        move_selected_by_metric = func()
-        my_cube.string_operation(move_selected_by_metric)
-        swept_cubes[i] = my_cube.get_curr_state()
-        metric[i] = my_cube.calculate_metric()
     
 
+# visualize_cube.animate(swept_cubes,animation_speed,fig,ax)
 
+visualize_cube.animate(swept_cubes[::10],animation_speed,fig,ax)
 
-visualize_cube.animate([swept_cubes[1],swept_cubes[50],swept_cubes[99]],animation_speed,fig,ax)
+# visualize_cube.animate([swept_cubes[1],swept_cubes[50],swept_cubes[99]],animation_speed,fig,ax)
 
-plt.plot(energies)
+plt.plot(metric_values)
+plt.xlabel("sweeps")
+plt.ylabel("metric value")
 
 plt.show()
