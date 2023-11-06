@@ -6,7 +6,7 @@ import visualize_cube
 centres=[5,14,23,32,41,50]
 edges = [2,4,6,8,11,13,15,17,20,22,24,26,29,31,33,35,38,40,42,44,47,49,51,53]
 
-def nearest_neighbours_fn(pos): # returns the indeces of the tiles directly adjacent to pos
+def nearest_neighbours_fn(pos,zero_index=False): # returns the indeces of the tiles directly adjacent to pos
     # print("pos input: ", pos)
     if pos%9 == 1:
         neighbours = [pos+1,pos+3]
@@ -28,9 +28,12 @@ def nearest_neighbours_fn(pos): # returns the indeces of the tiles directly adja
         neighbours = [pos-3,pos-1]
     else:
         raise Exception("pos argument provided not an int")
-    return neighbours
+    neighbour_array = np.array(neighbours)
+    if zero_index==True:
+        neighbour_array = neighbour_array - 1
+    return neighbour_array
     
-def splash_neighbours_fn(pos):  # returns the indeces of the tiles surrounding pos
+def splash_neighbours_fn(pos,zero_index=False):  # returns the indeces of the tiles surrounding pos
     # print("pos input: ", pos)
     if pos%9 == 1:
         neighbours = [pos+1,pos+3,pos+4]
@@ -52,7 +55,12 @@ def splash_neighbours_fn(pos):  # returns the indeces of the tiles surrounding p
         neighbours = [pos-3,pos-1,pos-4]
     else:
         raise Exception("pos argument provided not an int")
-    return neighbours
+    neighbour_array = np.array(neighbours)
+    if zero_index==True:
+        neighbour_array = neighbour_array - 1
+    return neighbour_array
+
+
 
 
 
@@ -112,14 +120,14 @@ def Miles_Metric_splash_neighbours(config):
             segment_colour = face[square]
 
             #finds the unique colours amongst the neighbours of square, and its multiplicity
-            unique, counts = np.unique(face[splash_neighbours_fn(square+1)], return_counts=True)
+            unique, counts = np.unique(face[splash_neighbours_fn(square,zero_index=True)], return_counts=True)
             unique_dict = dict(zip(unique, counts))
             
             try:# finds how many amongst the neighbours have the same colour as square
                 segment_count = unique_dict[segment_colour]
             except KeyError:
                 segment_count = 0
-            segment_frac = segment_count / len(splash_neighbours_fn(square+1))
+            segment_frac = segment_count / len(splash_neighbours_fn(square))
             
             face_sum += segment_frac
         
@@ -131,8 +139,7 @@ def Miles_Metric_splash_neighbours(config):
 
     return total_avg
 
-test_config=np.concatenate((np.ones(9),np.zeros(9),np.zeros(9),np.zeros(9),np.ones(9),[1,2,3,4,5,0,0,0,0]))
-Miles_Metric_splash_neighbours(test_config)
+
 
 def Miles_Metric(config):
     sum=0
