@@ -4,6 +4,7 @@ import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.animation import FuncAnimation
 from cube import cube
+import visualize_cube
 import metrics
 import matplotlib
 matplotlib.rcParams.update({
@@ -95,54 +96,6 @@ def Miles_Metric_Move():
 
 
 
-
-
-colours = ['white', 'yellow', 'red', 'orange', 'blue', 'green']
-def my_visualise_face(face, translation, ax):
-
-    ax.add_patch(plt.Rectangle((translation[0]-1, translation[1]+1), 0.8, 0.8, color=colours[int(face[0][0])]))
-    ax.add_patch(plt.Rectangle((translation[0]+0, translation[1]+1), 0.8, 0.8, color=colours[int(face[0][1])]))
-    ax.add_patch(plt.Rectangle((translation[0]+1, translation[1]+1), 0.8, 0.8, color=colours[int(face[0][2])]))
-
-    ax.add_patch(plt.Rectangle((translation[0]-1, translation[1]+0), 0.8, 0.8, color=colours[int(face[1][0])]))
-    ax.add_patch(plt.Rectangle((translation[0]+0, translation[1]+0), 0.8, 0.8, color=colours[int(face[1][1])]))
-    ax.add_patch(plt.Rectangle((translation[0]+1, translation[1]+0), 0.8, 0.8, color=colours[int(face[1][2])]))
-
-    ax.add_patch(plt.Rectangle((translation[0]-1, translation[1]-1), 0.8, 0.8, color=colours[int(face[2][0])]))
-    ax.add_patch(plt.Rectangle((translation[0]+0, translation[1]-1), 0.8, 0.8, color=colours[int(face[2][1])]))
-    ax.add_patch(plt.Rectangle((translation[0]+1, translation[1]-1), 0.8, 0.8, color=colours[int(face[2][2])]))
-
-def my_visualise_state(matrix,ax):
-
-    ax.add_patch(plt.Rectangle((-15, -15), 30, 30, color='gray'))
-
-    vis_state = my_create_vis_cube_state(matrix)
-
-    # ax.add_patch(plt.Rectangle((0, 0), 0.8, 0.8, color=colours[state[0][0][0]]))
-    my_visualise_face(vis_state[0], [0, 0], ax)
-    my_visualise_face(vis_state[1], [8, 0], ax)
-    my_visualise_face(vis_state[2], [0, 4], ax)
-    my_visualise_face(vis_state[3], [0, -4], ax)
-    my_visualise_face(vis_state[4], [4, 0], ax)
-    my_visualise_face(vis_state[5], [-4, 0], ax)
-
-    # plt.xlim(-7.5, 12.5)
-    # plt.ylim(-10, 10)
-    # plt.axis('off')
-    # plt.gca().set_aspect('equal')
-
-def my_create_vis_cube_state(matrix):
-
-    cube_state_split_1 = np.split(np.copy(matrix), 6)
-    cube_state_split_final = []
-
-    for i in cube_state_split_1:
-        cube_state_split_final.append(np.split(i, 3))
-
-    return np.array(cube_state_split_final)
-
-
-
 sweeps=10000
 beta=0.9
 num_frames = sweeps
@@ -150,24 +103,7 @@ animation_speed = 500
 hot_start(30)
 
 
-def animate(lattices):
-    matrices = lattices
-    num_frames=len(lattices)
-    # Create a figure and axis for the animation
-    # fig, ax = plt.subplots()
-    plt.xlim(-7.5, 12.5)
-    plt.ylim(-10, 10)
-    plt.axis('off')
-    plt.gca().set_aspect('equal')
-    # Function to update the plot for each frame
-    def update(frame):
-        # ax.clear()
-        my_visualise_state(matrices[frame],ax)
-        ax.set_title(f'Frame {frame + 1}/{num_frames}')
 
-    # Create the animation
-    animation = FuncAnimation(fig, update, frames=num_frames, repeat=False, interval=animation_speed)
-    plt.show()
 
 
 
@@ -190,9 +126,9 @@ def Minimize(n,func):
         metric[i] = my_cube.calculate_metric()
     
 
-# Minimize(sweeps,Miles_Metric_Move)
 
-animate([swept_cubes[1],swept_cubes[50],swept_cubes[99]])
+
+visualize_cube.animate([swept_cubes[1],swept_cubes[50],swept_cubes[99]],animation_speed,fig,ax)
 
 plt.plot(energies)
 
